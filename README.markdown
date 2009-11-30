@@ -10,10 +10,10 @@ Mam nadzieję, że zmiany będą przeprowadzane przez wszystkich uczestników za
 
 ### Tutoriale ###
 
-* http://www.chadvernon.com/blog/tutorials/directx9/
-* http://www.two-kings.de/tutorials/dxgraphics/
-* http://www.danielloran.com/study/directx/Default.aspx
-* http://www.codesampler.com/dx9src.htm
+* [http://www.chadvernon.com/blog/tutorials/directx9/](http://www.chadvernon.com/blog/tutorials/directx9/)
+* [http://www.two-kings.de/tutorials/dxgraphics/](http://www.two-kings.de/tutorials/dxgraphics/)
+* [http://www.danielloran.com/study/directx/Default.aspx](http://www.danielloran.com/study/directx/Default.aspx)
+* [http://www.codesampler.com/dx9src.htm](http://www.codesampler.com/dx9src.htm)
 
 ### Oprogramowanie ###
 * [Microsoft Visual C++ 2008 Express Edition](http://www.microsoft.com/exPress/vc/ "Microsoft Visual C++ 2008 Express Edition")
