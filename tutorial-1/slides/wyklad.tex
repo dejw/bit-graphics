@@ -1,0 +1,218 @@
+% wyklad.tex
+\documentclass{beamer}
+\usetheme{Amsterdam}
+
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage{polski}
+\usepackage{listings}
+\usepackage{url}
+\setcounter{tocdepth}{2}
+
+\setbeamercovered{dynamic}
+
+% strona tytuowa
+\title[Bit - Sekcja Grafiki]{Bit - Sekcja Grafiki}
+\subtitle[Wprowadzanie do Direct3D]{Wprowadzanie do Direct3D}
+\author[Dawid Fatyga]{Dawid Fatyga\\ \texttt{fatyga@student.agh.edu.pl}}
+\institute[AGH]{Akademia Górniczo Hutnicza}
+\date[Grudzień 2009]{Grudzień 3, 2009}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+  \frametitle{O tym co dzisiaj}
+  \tableofcontents[pausesections]
+\end{frame}
+
+\section{Powtórka z matematyki}
+\subsection{Poruszane zagadnienia}
+\begin{frame}
+  \frametitle{Powtórka z matematyki}
+
+  \begin{enumerate}
+    \item Trochę o wektorach
+    \item Macierze, wyznacznik i działania na macierzach
+    \item Transformacje macierzowe
+  \end{enumerate}
+
+\end{frame}
+
+\subsection{Trochę o wektorach}
+\subsubsection{Definicja}
+
+\begin{frame}
+  \frametitle{Definicja}
+
+  \begin{definition}[Wektor]
+    Obiekt geometryczny w matematyce elementarnej, mający moduł (zwany też długością), kierunek i zwrot określający orientację wzdłuż danego kierunku.
+  \end{definition}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Reprezetancja}
+    \begin{definition}
+  W trójwymiarowej przestrzeni euklidesowej (lub $ \mathbb{R}^3 $) wektory reprezentowane są jako trójki liczb odpowiadającym współrzędnym kartezjańskim punktu końcowego, co można zapisać: \\
+  \begin{center}
+    \begin{math}
+      \overrightarrow{v} =
+      \begin{bmatrix}
+        v_{x} \\
+        v_{y} \\
+        v_{z}
+      \end{bmatrix}
+    \end{math}
+  \end{center}
+  \end{definition}
+
+  \pause
+
+  \begin{definition}[Długość wektora]
+    \begin{math}
+      |\overrightarrow{v}| = \sqrt{(v_{x}^2 + v_{y}^2 + v_{z}^2)}
+    \end{math}
+  \end{definition}
+
+\end{frame}
+
+\subsubsection{Działania na wektorach}
+\begin{frame}
+  \frametitle{Działania na wektorach}
+  \begin{definition}[Iloczyn skalarny]
+    Jest to pewne działanie przyporządkowujące parze wektorów pewną wartość rzeczywistą (skalarną). \\
+    \begin{center}
+      \begin{math}
+        \overrightarrow{v} \cdot \overrightarrow{u} = v_{x}*u_{x} + v_{y}*u_{y} + v_{z}*u_{z}
+      \end{math}
+    \end{center}
+  \end{definition}
+
+  \pause
+
+  \begin{definition}[Interpretacja geometryczna iloczynu skalarnego]
+    Wartość iloczynu wektorowego jest równa iloczynowi długości tych wektorów i kosinusa konta między nimi: \\
+
+  \begin{center}
+    \begin{math}
+      \overrightarrow{v} \cdot \overrightarrow{u} = |\overrightarrow{v}||\overrightarrow{u}|\cos(\overrightarrow{v}, \overrightarrow{u})
+    \end{math}
+  \end{center}
+  \end{definition}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Iloczyn wektorowy}
+  \begin{definition}
+    Jest to pewne działanie przyporządkowujące parze wektorów $\overrightarrow{v}$ i $\overrightarrow{u}$ pewien wektor $\overrightarrow{w}$:
+    \begin{enumerate}
+      \item Jeśli $\overrightarrow{v}$ i $\overrightarrow{u}$ są liniowo zależne wynikiem jest wektor zerowy.
+      \item W przeciwnym wypadku:
+        \begin{itemize}
+          \item $\overrightarrow{w} \perp \overrightarrow{v} \wedge \overrightarrow{w} \perp \overrightarrow{u}$
+          \item $ |\overrightarrow{w}| = |\overrightarrow{v}||\overrightarrow{u}|\sin(\overrightarrow{v}, \overrightarrow{u}) $
+        \end{itemize}
+    \end{enumerate}
+  \end{definition}
+
+  O tym jak go wyznaczyć za chwilę...
+\end{frame}
+
+\subsection{Macierze, wyznacznik i działania na macierzach}
+\subsubsection{Definicja}
+
+\begin{frame}
+  \frametitle{Definicja}
+  \begin{definition}[Macierz]
+    Układ zapisanych w postaci prostokątnej tablicy danych nazywanych elementami bądź współczynnikami. Dla nas szczególnie interesującę bedą macierze kwadratowe o wymiarach 4x4, dla przykładu: \\
+     \begin{center}
+    \begin{math}
+      \textbf{M} =
+      \begin{bmatrix}
+        1  & 2  & 3  & 4 \\
+        5  & 6  & 7  & 8 \\
+        9  & 10 & 11 & 12 \\
+        13 & 14 & 15 & 16
+      \end{bmatrix}
+    \end{math}
+  \end{center}
+  \end{definition}
+\end{frame}
+
+\subsubsection{Wyznacznik macierzy}
+
+\begin{frame}
+  \frametitle{Wyznacznik macierzy}
+  \begin{definition}
+    Operacja przyporządkowująca każdej macierzy prostokątnej pewną wartość rzeczywistą.
+    \begin{center}
+      \begin{math}
+        \det{M} = \sum_{k = 0}^{N} (-1)^{1 + k} a_{ik} \det{M_{i, k}}
+      \end{math}
+    \end{center}
+  \end{definition}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Wyznacznik macierzy a iloczyn wektorowy}
+  \begin{definition}
+    \begin{center}
+      \begin{math}
+        \overrightarrow{v} \times \overrightarrow{u} = \det{
+          \begin{bmatrix}
+        \hat{i}  & \hat{j}  & \hat{k} \\
+        v_{x}  & v_{y} & v_{z} \\
+        v_{x}  & u_{y} & u_{z}
+          \end{bmatrix}
+        } = \hat{i}(v_{y}u_{z} - v_{z}u_{y}) + \hat{j}(v_{x}u_{z} - v_{z}u_{x}) + \hat{k}(v_{x}u_{y} - v_{y}u_{x})
+      = \begin{bmatrix}
+        v_{y}u_{z} - v_{z}u_{y} \\
+        v_{x}u_{z} - v_{z}u_{x} \\
+        v_{x}u_{y} - v_{y}u_{x}
+      \end{bmatrix} = \overrightarrow{w}
+      \end{math}
+    \end{center}
+  \end{definition}
+\end{frame}
+
+\subsection{Działania na macierzach}
+\begin{frame}
+  \frametitle{Działania na macierzach}
+  \begin{enumerate}
+    \item<1-> Transpozycja
+    \item<2-> Dodawanie
+    \item<3-> Mnożenie
+  \end{enumerate}
+\end{frame}
+
+\subsubsection{Transformacje macierzowe}
+\begin{frame}
+  \frametitle{Transformacje macierzowe}
+  \begin{enumerate}
+    \item<1-> Translacja
+    \item<2-> Skalowanie
+    \item<3-> Obrót
+  \end{enumerate}
+\end{frame}
+
+\section{Wprowadzenie do Direct3D}
+\subsection{Poruszane zagadnienia}
+\begin{frame}
+  \frametitle{Wprowadzenie do Direct3D}
+
+  \begin{enumerate}
+    \item Tworzenie urządzenia
+    \item Gdzie i jak mam rysować?
+    \item Trzeci wymiar
+    \item Przekształcenia
+    \item Teksturowanie
+  \end{enumerate}
+
+\end{frame}
+
+\end{document}
+
