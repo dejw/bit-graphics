@@ -18,6 +18,8 @@
 \institute[AGH]{Akademia Górniczo Hutnicza}
 \date[Grudzień 2009]{Grudzień 3, 2009}
 
+\lstset{language=C++}
+
 \begin{document}
 
 \begin{frame}
@@ -205,13 +207,223 @@
   \frametitle{Wprowadzenie do Direct3D}
 
   \begin{enumerate}
-    \item Tworzenie urządzenia
-    \item Gdzie i jak mam rysować?
+    \item Pierwszy program
+    \item Gdzie, jak i co mam rysować?
     \item Trzeci wymiar
     \item Przekształcenia
     \item Teksturowanie
   \end{enumerate}
 
+\end{frame}
+
+\subsection{Pierwszy program w Direct3D}
+\begin{frame}[fragile]
+\frametitle{Nagłówki}
+\begin{lstlisting}
+#ifdef DEBUG
+#define D3D_DEBUG_INFO
+  #pragma comment (lib, "d3dx9d.lib")
+#else
+  #pragma comment (lib, "d3dx9.lib")
+#endif // DEBUG
+#pragma comment (lib, "d3d9.lib")
+#include <d3dx9.h>
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Tworzenie urządzenia}
+\begin{lstlisting}
+IDirect3D9* d3d = Direct3DCreate9(D3D_SDK_VERSION); // "obiekt" biblioteki
+// ... parametry
+IDirect3DDevice9* device;
+HRESULT result = d3d->CreateDevice(
+                  D3DADAPTER_DEFAULT,
+                  D3DDEVTYPE_HAL,
+                  app.window_handle(),
+   D3DCREATE_SOFTWARE_VERTEXPROCESSING, // ;(
+                  &parameters,
+                  &device);
+if(FAILED(result)) return 1; // Smutno :(
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Parametry urządzenia}
+\begin{lstlisting}
+// ... parametry
+D3DPRESENT_PARAMETERS parameters;
+ZeroMemory(&parameters, sizeof(parameters));
+parameters.Windowed = true;
+\end{lstlisting}
+\begin{itemize}
+  \item \texttt{Windowed} -- okno czy na pełny ekran?
+  \item \texttt{SwapEffect} -- zalecane \texttt{D3DSWAPEFFECT\_DISCARD}
+  \item \texttt{BackBufferCount} -- ilość dodatkowych buforów
+  \item \texttt{BackBufferFormat} -- \texttt{D3DFMT\_X8R8G8B8}
+  \item \texttt{EnableAutoDepthStencil} -- użyć bufora głębi?
+  \item \texttt{BackBufferFormat} -- \texttt{D3DFMT\_D16} albo \texttt{D3DFMT\_D24S8}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Główna pętla i sprzątanie}
+\begin{lstlisting}
+while(app.running()){
+  device->Clear(0, NULL,
+      D3DCLEAR_TARGET,
+      D3DCOLOR_XRGB(0, 0, 0),
+      1.0f, 0);
+  device->BeginScene();
+  // ...
+  device->EndScene();
+  device->Present(NULL, NULL, NULL, NULL);
+}
+device->Release();
+d3d->Release();
+\end{lstlisting}
+
+\end{frame}
+
+\subsection{Gdzie, jak i co mam rysować?}
+\begin{frame}[fragile]
+\frametitle{Wierzchołki}
+
+\begin{lstlisting}
+#define Vertex_Format \
+  (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
+struct Vertex {
+  float x, y, z, rhw;
+  DWORD color;
+};
+\end{lstlisting}
+
+\begin{itemize}
+  \item \texttt{D3DFVF\_XYZRHW} -- współrzędne do rysowania od razu na ekranie
+  \item \texttt{D3DFVF\_XYZ} -- współrzędne do transformacji
+  \item \texttt{D3DFVF\_DIFFUSE} -- kolor wierzchołka
+  \item \texttt{D3DFVF\_TEX1} -- współrzędne tekstury
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Tablice wierzchołków}
+
+\begin{lstlisting}
+Vertex triangle[] = {
+// X    Y    Z  W  Color
+  {400, 100, 1, 1, D3DCOLOR_XRGB(0, 0, 255)},
+  {600, 500, 1, 1, D3DCOLOR_XRGB(0, 255, 0)},
+  {200, 500, 1, 1, D3DCOLOR_XRGB(255, 0, 0)}
+};
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Rysujemy}
+
+\begin{lstlisting}
+device->SetFVF(Vertex_Format);
+device->Clear(0, NULL, D3DCLEAR_TARGET,
+      D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+
+device->BeginScene();
+device->DrawPrimitiveUP(D3DPT_TRIANGLESLIST, 1,
+                    triangle, sizeof(Vertex));
+device->EndScene();
+device->Present(NULL, NULL, NULL, NULL);
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Bufor wierzchołków}
+
+Jest jedynym słuszym sposobem rysowania czegokolwiek.
+
+\begin{lstlisting}
+IDirect3DVertexBuffer9* buffer;
+device->CreateVertexBuffer(3 * sizeof(Vertex), 0,
+    Vertex_Format,
+    D3DPOOL_MANAGED,
+    &buffer,
+    NULL);
+// a po wywolaniu device->BeginScene() ...
+device->SetStreamSource(0, buffer,
+    0, sizeof(Vertex));
+device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Rodzaje rysowania trójkątów}
+
+\begin{itemize}
+  \item \texttt{D3DPT\_TRIANGLELIST} -- Lista trójkątów
+  \item \texttt{D3DPT\_TRIANGLESTRIP} -- Nowy wierzchołek tworzy trójkąt z dwoma poprzednimi
+  \item \texttt{D3DPT\_TRIANGLESFAN} -- Nowy wierzchołek tworzy trójkąt z poprzednim i pierwszym wierzchołkiem (pierwszy wierchołek jest centrum ''wachlarza'')
+\end{itemize}
+
+\end{frame}
+
+\subsection{Trzeci wymiar i teksturowanie}
+\begin{frame}[fragile]
+\frametitle{Trzeci wymiar -- czego potrzebujemy?}
+
+\begin{itemize}
+  \item<1-> Innych wierzchołków -- \texttt{D3DFVF\_XYZ}
+  \item<2-> Przekształcenia projekcji -- perspektywiczne / ortogonalne.
+  \item<3-> Przekształcenia widoku, czyli oka kamery.
+  \item<4-> Modelu do rysowania -- przykładowo pudełka.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Kiedy kolory nam się nudzą...}
+
+\begin{itemize}
+  \item<1-> Nowa flaga w formacie wierzchołków -- \texttt{D3DFVF\_TEX1}
+  \item<2-> Współrzędne tekstury.
+  \item<3-> Obiekty tekstur.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Tekstury w pigułce}
+
+\begin{itemize}
+  \item<1-> Najprościej:
+\begin{lstlisting}
+LPDIRECT3DTEXTURE9 texture;
+D3DXCreateTextureFromFile(device,
+  "images\\texture.jpg",
+  &texture);
+\end{lstlisting}
+  \item<2-> \texttt{D3DXCreateTextureFromFileEx()} daje większe możliwości.
+  \item<3-> Włączamy teksturę za pomocą:
+\begin{lstlisting}
+device->SetTexture(0, texture)
+\end{lstlisting}
+  \item<4-> Usuwamy standardowo za pomocą \texttt{texture->Release()}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Odnośniki}
+
+\begin{itemize}
+  \item \texttt{www.chadvernon.com/blog/tutorials/directx9/}
+  \item \texttt{www.two-kings.de/tutorials/dxgraphics/}
+  \item \texttt{www.danielloran.com/study/directx/Default.aspx}
+  \item \texttt{www.codesampler.com/dx9src.htm}
+\end{itemize}
 \end{frame}
 
 \end{document}
